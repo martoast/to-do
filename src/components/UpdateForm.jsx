@@ -7,6 +7,11 @@ const UpdateForm = ({ updateData, changeTask, updateTask, cancelUpdate }) => {
             <input 
               value={ updateData && updateData.title }
               onChange={ (e) => changeTask(e)}
+              onKeyDown={ (e) => {
+                if (e.key === "Enter") {
+                    updateTask()
+                }
+              }}
               className="form-control form-control-lg"
             />
           </div>

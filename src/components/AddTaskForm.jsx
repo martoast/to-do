@@ -7,6 +7,11 @@ const AddTaskForm = ({ newTask, setNewTask, addTask }) => {
             <input 
               value={newTask}
               onChange={ (e) => setNewTask(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                    addTask()
+                }
+              }}
               className="form-control form-control-lg"
             />
           </div>
