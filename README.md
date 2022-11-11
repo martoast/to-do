@@ -1,7 +1,7 @@
 Build the Docker image:
 
-docker build . -t dockerized-react
+docker build . -t to-do
 
 Run the image:
 
-docker run -p 3000:80 -d dockerized-react
+docker run -p 3000:80 -d to-do
