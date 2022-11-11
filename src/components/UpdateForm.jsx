@@ -1,4 +1,4 @@
-const UpdateForm = ({ updateData, changeTask, updateTask, cancelUpdate }) => {
+const UpdateForm = ({ updateData, changeTask, updateTask, cancelUpdate, loading }) => {
     return(
       <>
         {/* Update Task */}
@@ -18,10 +18,12 @@ const UpdateForm = ({ updateData, changeTask, updateTask, cancelUpdate }) => {
           <div className="col-auto">
             <button
               onClick={updateTask}
+              disabled={loading}
               className="btn btn-lg btn-success mr-20"
             >Update</button>
             <button
               onClick={cancelUpdate}
+              disabled={loading}
               className="btn btn-lg btn-warning"
             >Cancel</button>
           </div>

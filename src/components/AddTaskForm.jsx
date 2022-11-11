@@ -1,4 +1,4 @@
-const AddTaskForm = ({ newTask, setNewTask, addTask }) => {
+const AddTaskForm = ({ newTask, setNewTask, addTask, loading }) => {
     return(
       <>
         {/* Add Task */}
@@ -18,6 +18,7 @@ const AddTaskForm = ({ newTask, setNewTask, addTask }) => {
           <div className="col-auto">
             <button
               onClick={addTask}
+              disabled={loading}
               className="btn btn-lg btn-success"
             >Add Task</button>
           </div>

@@ -1,48 +1,85 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import AddTaskForm from './components/AddTaskForm.jsx';
 import UpdateForm from './components/UpdateForm.jsx';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ToDo from './components/ToDo.jsx';
-
 import './App.css';
 
-function App() {
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, getDocs, doc, deleteDoc, setDoc, updateDoc } from 'firebase/firestore/lite';
 
-  const [toDo, setToDo] = useState([]);
+
+function App() {
+  // Initialize Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyCwNhldysAEyELi00BjqOIYl_sxiLiprCA",
+    authDomain: "to-do-cab39.firebaseapp.com",
+    projectId: "to-do-cab39",
+    storageBucket: "to-do-cab39.appspot.com",
+    messagingSenderId: "170103431087",
+    appId: "1:170103431087:web:fcaa10c40d3b629738995a"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const [db] = useState(getFirestore(app));
+
+  //Todos state
+  const [toDo, setToDos] = useState([]);
 
   //Temp state
   const [newTask, setNewTask] = useState('');
   const [updateData, setUpdateData] = useState('');
 
+  const [loading, setLoading] = useState(false)
 
+  useEffect(() => {
+    getTodos(db)
+  }, [db]);
+
+
+  async function getTodos(db) {
+    setLoading(true);
+      try {
+        const todosCol = collection(db, 'todos');
+        const todoSnapshot = await getDocs(todosCol);
+        const todoList = todoSnapshot.docs.map(doc => doc.data());
+        console.log(todoList)
+        setToDos(todoList)
+      }
+      catch (e) {
+        console.error(e);
+      }
+      setLoading(false);
+
+    }
+  
   // Add task 
   ///////////////////////////
-  const addTask = () => {
+  const addTask = async () => {
     if(newTask) {
       let num = toDo.length + 1; 
       let newEntry = { id: num, title: newTask, status: false }
-      setToDo([...toDo, newEntry])
+      console.log(num, newEntry)
+      await setDoc(doc(db, "todos", num.toString()), newEntry);
+      await getTodos(db)
       setNewTask('');
     }
   }
 
   // Delete task 
   ///////////////////////////
-  const deleteTask = (id) => {
-    let newTasks = toDo.filter( task => task.id !== id)
-    setToDo(newTasks);
+  const deleteTask = async (id) => {
+    await deleteDoc(doc(db, "todos", id.toString()));
+    await getTodos(db)
   }
 
   // Mark task as done or completed
   ///////////////////////////
-  const markDone = (id) => {
-    let newTask = toDo.map( task => {
-      if( task.id === id ) {
-        return ({ ...task, status: !task.status })
-      }
-      return task;
-    })
-    setToDo(newTask);
+  const markDone = async (id) => {
+    let foundTask = toDo.find(task => task.id === id)
+    const docRef = doc(db, "todos", foundTask.id.toString());
+    await updateDoc(docRef, {...foundTask, status: !foundTask.status})
+    await getTodos(db)
   }
 
   // Cancel update
@@ -64,14 +101,12 @@ function App() {
 
   // Update task
   ///////////////////////////
-  const updateTask = () => {
-    let filterRecords = [...toDo].filter( task => task.id !== updateData.id );
-    let updatedObject = [...filterRecords, updateData]
-    setToDo(updatedObject);
+  const updateTask = async () => {
+    const docRef = doc(db, "todos", updateData.id.toString());
+    await updateDoc(docRef, updateData)
+    await getTodos(db)
     setUpdateData('');
   }
-
-
 
   return (
     <div className="container App">
@@ -80,14 +115,16 @@ function App() {
       <br/><br/>
 
       {updateData ? (
-      <UpdateForm 
+      <UpdateForm
+        loading={loading}
         updateData={updateData}
         changeTask={changeTask}
         updateTask={updateTask}
         cancelUpdate={cancelUpdate}
       />
     ) : (
-      <AddTaskForm 
+      <AddTaskForm
+        loading={loading}
         newTask={newTask}
         setNewTask={setNewTask}
         addTask={addTask}
@@ -102,7 +139,6 @@ function App() {
       setUpdateData={setUpdateData}
       deleteTask={deleteTask}
     /> 
-
 
     </div>
   );
